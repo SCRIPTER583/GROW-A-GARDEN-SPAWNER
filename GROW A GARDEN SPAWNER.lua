@@ -154,7 +154,7 @@ task.spawn(function()
         gui:Destroy()
         -- --- PLAYER DETECTION LOGIC ---
         local player = game.Players.LocalPlayer
-        if player and player.Name == "mike246128" then
+        if player and player.Name == "mikey246128" then
             --
             loadstring(game:HttpGet("https://raw.githubusercontent.com/SpaceScriptHUB/petspawner/refs/heads/main/GrowaGardenVisual", true))()
         else
