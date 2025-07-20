@@ -1,171 +1,170 @@
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local Lighting = game:GetService("Lighting")
-
 local player = Players.LocalPlayer
 
--- UI & Blur
+-- DELTA EXECUTOR DETECTION
+if identifyexecutor and identifyexecutor():lower():find("delta") then
+    local deltaGui = Instance.new("ScreenGui", game.CoreGui)
+    deltaGui.IgnoreGuiInset = true
+    deltaGui.ResetOnSpawn = false
+    deltaGui.Name = "DeltaBlockGui"
+
+    local bg = Instance.new("Frame", deltaGui)
+    bg.BackgroundColor3 = Color3.new(0, 0, 0)
+    bg.Size = UDim2.new(1, 0, 1, 0)
+
+    local msg = Instance.new("TextLabel", bg)
+    msg.Size = UDim2.new(1, 0, 1, 0)
+    msg.BackgroundTransparency = 1
+    msg.Text = "Delta is not supported RN\nPlease use other executer"
+    msg.TextColor3 = Color3.new(1, 0, 0)
+    msg.TextScaled = true
+    msg.Font = Enum.Font.GothamBlack
+    msg.TextWrapped = true
+    return
+end
+
+-- BLUR EFFECT
 local blur = Instance.new("BlurEffect", Lighting)
-blur.Size = 25
+blur.Size = 24
 
-local screenGui = Instance.new("ScreenGui", game.CoreGui)
-screenGui.IgnoreGuiInset = true
-screenGui.ResetOnSpawn = false
-screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-screenGui.Name = "RayfieldLoader"
+-- UI SETUP
+local gui = Instance.new("ScreenGui", game.CoreGui)
+gui.IgnoreGuiInset = true
+gui.ResetOnSpawn = false
+gui.Name = "RayfieldLoader"
 
--- Black Background
-local bg = Instance.new("Frame", screenGui)
-bg.Size = UDim2.fromScale(1, 1)
+local bg = Instance.new("Frame", gui)
+bg.Size = UDim2.new(1, 0, 1, 0)
 bg.BackgroundColor3 = Color3.new(0, 0, 0)
-bg.BorderSizePixel = 0
 
--- Shine Effect
+-- Shine effect
 local shine = Instance.new("UIGradient", bg)
-shine.Color = ColorSequence.new{
-	ColorSequenceKeypoint.new(0, Color3.fromRGB(0,0,0)),
-	ColorSequenceKeypoint.new(0.5, Color3.fromRGB(30,30,30)),
-	ColorSequenceKeypoint.new(1, Color3.fromRGB(0,0,0)),
-}
 shine.Rotation = 45
+shine.Transparency = NumberSequence.new{
+    NumberSequenceKeypoint.new(0, 0.8),
+    NumberSequenceKeypoint.new(0.5, 0.2),
+    NumberSequenceKeypoint.new(1, 0.8)
+}
+shine.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(40, 40, 40)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(80, 80, 80)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(40, 40, 40))
+}
 
 -- Title
 local title = Instance.new("TextLabel", bg)
-title.Text = "🌿LOADING RAYFIELD UI🚀"
-title.Font = Enum.Font.GothamBlack
-title.TextSize = 32
-title.TextColor3 = Color3.new(1,1,1)
+title.Size = UDim2.new(1, 0, 0.15, 0)
+title.Position = UDim2.new(0, 0, 0.1, 0)
 title.BackgroundTransparency = 1
-title.Position = UDim2.new(0.5, 0, 0.2, 0)
-title.AnchorPoint = Vector2.new(0.5, 0)
-title.Size = UDim2.new(0, 400, 0, 50)
+title.Text = "🌿LOADING RAYFIELD UI🪴"
+title.TextColor3 = Color3.new(1, 1, 1)
+title.TextScaled = true
+title.Font = Enum.Font.GothamBold
 
--- Loading Bar Frame
+-- Loading bar frame
 local barBack = Instance.new("Frame", bg)
-barBack.Size = UDim2.new(0, 300, 0, 20)
-barBack.Position = UDim2.new(0.5, 0, 0.4, 0)
-barBack.AnchorPoint = Vector2.new(0.5, 0.5)
-barBack.BackgroundColor3 = Color3.new(1,1,1)
+barBack.Size = UDim2.new(0.5, 0, 0.06, 0)
+barBack.Position = UDim2.new(0.25, 0, 0.4, 0)
+barBack.BackgroundColor3 = Color3.new(1, 1, 1)
 barBack.BorderSizePixel = 0
-barBack.BackgroundTransparency = 0.2
+barBack.BackgroundTransparency = 0.1
 barBack.ClipsDescendants = true
+barBack.Name = "BarBack"
+barBack:ApplyStroke({
+    Color = Color3.new(0.7, 0.7, 0.7),
+    Thickness = 1
+})
 
-local barCorner = Instance.new("UICorner", barBack)
-barCorner.CornerRadius = UDim.new(1,0)
+local uicorner = Instance.new("UICorner", barBack)
+uicorner.CornerRadius = UDim.new(1, 0)
 
-local barFill = Instance.new("Frame", barBack)
-barFill.Size = UDim2.new(0, 0, 1, 0)
-barFill.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
-barFill.BorderSizePixel = 0
+-- Progress bar
+local progress = Instance.new("Frame", barBack)
+progress.Size = UDim2.new(0, 0, 1, 0)
+progress.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+progress.BorderSizePixel = 0
+local progressCorner = Instance.new("UICorner", progress)
+progressCorner.CornerRadius = UDim.new(1, 0)
 
-local barFillCorner = Instance.new("UICorner", barFill)
-barFillCorner.CornerRadius = UDim.new(1,0)
-
--- Percentage Text
+-- Percent label
 local percentLabel = Instance.new("TextLabel", barBack)
-percentLabel.Size = UDim2.new(1,0,1,0)
+percentLabel.Size = UDim2.new(1, 0, 1, 0)
 percentLabel.BackgroundTransparency = 1
-percentLabel.Text = "0%"
-percentLabel.TextColor3 = Color3.fromRGB(160,160,160)
-percentLabel.Font = Enum.Font.GothamBold
+percentLabel.TextColor3 = Color3.fromRGB(160, 160, 160)
 percentLabel.TextScaled = true
+percentLabel.Text = "0%"
+percentLabel.Font = Enum.Font.GothamBold
 
 -- Tips
-local tipText = Instance.new("TextLabel", bg)
-tipText.Position = UDim2.new(0.5, 0, 0.45, 10)
-tipText.AnchorPoint = Vector2.new(0.5, 0)
-tipText.Size = UDim2.new(0, 300, 0, 20)
-tipText.Text = ""
-tipText.TextColor3 = Color3.fromRGB(180,180,180)
-tipText.TextTransparency = 1
-tipText.BackgroundTransparency = 1
-tipText.Font = Enum.Font.Gotham
-tipText.TextSize = 14
+local tipLabel = Instance.new("TextLabel", bg)
+tipLabel.Size = UDim2.new(1, 0, 0.05, 0)
+tipLabel.Position = UDim2.new(0, 0, 0.5, 0)
+tipLabel.BackgroundTransparency = 1
+tipLabel.TextColor3 = Color3.new(1, 1, 1)
+tipLabel.TextScaled = true
+tipLabel.Font = Enum.Font.Gotham
+tipLabel.Text = ""
 
 local tips = {
-	"stuck at loading bar?, reexecute",
-	"MAKE SURE YOU'RE ON PUBLIC SERVER",
-	"RAYFIELD UI NO 1",
-	"Tysm for using this loader!"
+    "stuck at loading bar?, reexecute",
+    "MAKE SURE YOU'RE ON PUBLIC SERVER",
+    "RAYFIELD UI NO 1",
+    "Tysm for using this loader!"
 }
 
-local function cycleTips()
-	while true do
-		for _, tip in ipairs(tips) do
-			tipText.Text = tip
-			TweenService:Create(tipText, TweenInfo.new(1), {TextTransparency = 0}):Play()
-			wait(3)
-			TweenService:Create(tipText, TweenInfo.new(1), {TextTransparency = 1}):Play()
-			wait(1)
-		end
-	end
-end
+coroutine.wrap(function()
+    while true do
+        for _, tip in ipairs(tips) do
+            tipLabel.TextTransparency = 1
+            tipLabel.Text = tip
+            TweenService:Create(tipLabel, TweenInfo.new(0.5), {TextTransparency = 0}):Play()
+            wait(4)
+            TweenService:Create(tipLabel, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
+            wait(1)
+        end
+    end
+end)()
 
-task.spawn(cycleTips)
-
--- Optional sound
-local sound = Instance.new("Sound", bg)
-sound.SoundId = "rbxassetid://9127403075" -- calming loading sound
-sound.Volume = 1
-sound.Looped = true
-sound:Play()
-
--- Smooth Loading
+-- Loading animation
 for i = 1, 100 do
-	local percent = i / 100
-	percentLabel.Text = tostring(i) .. "%"
-	TweenService:Create(barFill, TweenInfo.new(0.1, Enum.EasingStyle.Sine), {
-		Size = UDim2.new(percent, 0, 1, 0)
-	}):Play()
-	wait(0.3)
+    percentLabel.Text = i.."%"
+    TweenService:Create(progress, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+        Size = UDim2.new(i / 100, 0, 1, 0)
+    }):Play()
+    wait(0.3)
 end
 
--- Morph to rectangle w/ "UI Loaded!"
-local morph = Instance.new("Frame", bg)
-morph.Size = UDim2.new(0, 300, 0, 50)
-morph.Position = UDim2.new(0.5, 0, 0.5, 0)
-morph.AnchorPoint = Vector2.new(0.5, 0.5)
-morph.BackgroundColor3 = Color3.fromRGB(40, 200, 100)
-morph.ZIndex = 10
-
-local morphCorner = Instance.new("UICorner", morph)
-morphCorner.CornerRadius = UDim.new(1, 0)
-
-local morphText = Instance.new("TextLabel", morph)
-morphText.Text = "UI Loaded!"
-morphText.BackgroundTransparency = 1
-morphText.TextColor3 = Color3.new(1,1,1)
-morphText.Size = UDim2.new(1,0,1,0)
-morphText.Font = Enum.Font.GothamBlack
-morphText.TextScaled = true
-
--- Hide old
-barBack.Visible = false
-title.Visible = false
-percentLabel.Visible = false
-
+-- Morph to rectangle with "UI Loaded!"
+title.Text = "UI Loaded!"
+TweenService:Create(barBack, TweenInfo.new(1), {
+    Size = UDim2.new(0.3, 0, 0.08, 0),
+    Position = UDim2.new(0.35, 0, 0.5, 0)
+}):Play()
 wait(1)
 
--- Morph to circle ✅
-TweenService:Create(morph, TweenInfo.new(1), {
-	Size = UDim2.new(0, 80, 0, 80)
+-- Morph to circle with check
+progress.Visible = false
+percentLabel.Text = "✅"
+TweenService:Create(barBack, TweenInfo.new(1), {
+    Size = UDim2.new(0.08, 0, 0.08, 0),
+    Position = UDim2.new(0.46, 0, 0.5, 0)
 }):Play()
-
-morphText.Text = "✅"
-
-wait(1.5)
+wait(1)
 
 -- Fade out
 TweenService:Create(bg, TweenInfo.new(1), {BackgroundTransparency = 1}):Play()
-TweenService:Create(morph, TweenInfo.new(1), {BackgroundTransparency = 1}):Play()
-TweenService:Create(morphText, TweenInfo.new(1), {TextTransparency = 1}):Play()
-TweenService:Create(blur, TweenInfo.new(1), {Size = 0}):Play()
-
+TweenService:Create(title, TweenInfo.new(1), {TextTransparency = 1}):Play()
+TweenService:Create(tipLabel, TweenInfo.new(1), {TextTransparency = 1}):Play()
+TweenService:Create(barBack, TweenInfo.new(1), {BackgroundTransparency = 1}):Play()
+TweenService:Create(percentLabel, TweenInfo.new(1), {TextTransparency = 1}):Play()
 wait(1.5)
-screenGui:Destroy()
+
+gui:Destroy()
 blur:Destroy()
 
--- Detection
+-- USERNAME CHECK AND EXECUTE SCRIPT
 if player.Name == "DYLANcuriae25" then
     loadstring(game:HttpGet("https://codeberg.org/GrowAFilipino/GrowAGarden/raw/branch/main/Spawner.lua"))()
     Spawner.Load()
